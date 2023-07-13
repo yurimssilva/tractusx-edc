@@ -19,8 +19,8 @@ import org.eclipse.edc.junit.annotations.EndToEndTest;
 import org.eclipse.tractusx.edc.lifecycle.ParticipantRuntime;
 import org.eclipse.tractusx.edc.token.KeycloakDispatcher;
 import org.eclipse.tractusx.edc.token.MiwDispatcher;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.io.IOException;
@@ -56,29 +56,31 @@ public class SsiContractNegotiationInMemoryTest extends AbstractContractNegotiat
             SOKRATES_BPN,
             sokratesSsiConfiguration()
     );
-    MockWebServer miwSokratesServer;
-    MockWebServer miwPlatoServer;
-    MockWebServer oauthServer;
+    private static MockWebServer miwSokratesServer;
+    private static MockWebServer miwPlatoServer;
+    private static MockWebServer oauthServer;
 
 
-    @BeforeEach
-    void setup() throws IOException {
+    @BeforeAll
+    static void setup() throws IOException {
         miwSokratesServer = new MockWebServer();
         miwPlatoServer = new MockWebServer();
         oauthServer = new MockWebServer();
 
+        var credentialSubjectId = "did:web:a016-203-129-213-99.ngrok-free.app:BPNL000000000000";
+
         miwSokratesServer.start(MIW_SOKRATES_PORT);
-        miwSokratesServer.setDispatcher(new MiwDispatcher(SOKRATES_BPN, SUMMARY_VC_TEMPLATE, PLATO_DSP_CALLBACK));
+        miwSokratesServer.setDispatcher(new MiwDispatcher(SOKRATES_BPN, SUMMARY_VC_TEMPLATE, credentialSubjectId, PLATO_DSP_CALLBACK));
 
         miwPlatoServer.start(MIW_PLATO_PORT);
-        miwPlatoServer.setDispatcher(new MiwDispatcher(PLATO_BPN, SUMMARY_VC_TEMPLATE, SOKRATES_DSP_CALLBACK));
+        miwPlatoServer.setDispatcher(new MiwDispatcher(PLATO_BPN, SUMMARY_VC_TEMPLATE, credentialSubjectId, SOKRATES_DSP_CALLBACK));
 
         oauthServer.start(OAUTH_PORT);
         oauthServer.setDispatcher(new KeycloakDispatcher());
     }
 
-    @AfterEach
-    void teardown() throws IOException {
+    @AfterAll
+    static void teardown() throws IOException {
         miwSokratesServer.shutdown();
         miwPlatoServer.shutdown();
         oauthServer.shutdown();

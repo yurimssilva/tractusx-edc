@@ -23,9 +23,8 @@ dependencies {
 
     // test runtime config
     testImplementation(libs.edc.config.filesystem)
-    testImplementation(libs.edc.vault.filesystem)
     testImplementation(libs.edc.dpf.http)
-    testImplementation(project(":spi:edr-cache-spi"))
+    testImplementation(project(":spi:edr-spi"))
     testImplementation(project(":core:edr-cache-core"))
     testImplementation(project(":edc-extensions:dataplane-proxy:edc-dataplane-proxy-consumer-api"))
     testImplementation(project(":edc-extensions:dataplane-proxy:edc-dataplane-proxy-provider-api"))

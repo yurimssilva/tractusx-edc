@@ -31,6 +31,9 @@ public class TestRuntimeConfiguration {
     public static final String PLATO_NAME = "PLATO";
     public static final String PLATO_BPN = PLATO_NAME + BPN_SUFFIX;
     public static final Integer PLATO_PROXIED_AAS_BACKEND_PORT = getFreePort();
+
+    public static final String PROXIED_PATH = "/events";
+
     public static final int MIW_PLATO_PORT = getFreePort();
 
     public static final int MIW_SOKRATES_PORT = getFreePort();
@@ -119,6 +122,7 @@ public class TestRuntimeConfiguration {
                 put("tx.ssi.oauth.client.id", "client_id");
                 put("tx.ssi.oauth.client.secret.alias", "client_secret_alias");
                 put("tx.ssi.miw.authority.id", "authorityId");
+                put("tx.ssi.miw.authority.issuer", "did:web:a016-203-129-213-99.ngrok-free.app:BPNL000000000000");
                 put("tx.vault.seed.secrets", "client_secret_alias:client_secret");
                 put("tx.ssi.endpoint.audience", SOKRATES_DSP_CALLBACK);
             }
@@ -186,7 +190,7 @@ public class TestRuntimeConfiguration {
                 put("edc.dataplane.selector.httpplane.properties", "{\"publicApiUrl\":\"http://localhost:" + PLATO_PUBLIC_API_PORT + "/api/public\"}");
                 put("tractusx.businesspartnervalidation.log.agreement.validation", "true");
                 put("edc.agent.identity.key", "BusinessPartnerNumber");
-                put("tx.dpf.proxy.gateway.aas.proxied.path", "http://localhost:" + PLATO_PROXIED_AAS_BACKEND_PORT);
+                put("tx.dpf.proxy.gateway.aas.proxied.path", "http://localhost:" + PLATO_PROXIED_AAS_BACKEND_PORT + PROXIED_PATH);
                 put("tx.dpf.proxy.gateway.aas.authorization.type", "none");
             }
         };
@@ -200,6 +204,7 @@ public class TestRuntimeConfiguration {
                 put("tx.ssi.oauth.client.id", "client_id");
                 put("tx.ssi.oauth.client.secret.alias", "client_secret_alias");
                 put("tx.ssi.miw.authority.id", "authorityId");
+                put("tx.ssi.miw.authority.issuer", "did:web:a016-203-129-213-99.ngrok-free.app:BPNL000000000000");
                 put("tx.vault.seed.secrets", "client_secret_alias:client_secret");
                 put("tx.ssi.endpoint.audience", PLATO_DSP_CALLBACK);
             }
