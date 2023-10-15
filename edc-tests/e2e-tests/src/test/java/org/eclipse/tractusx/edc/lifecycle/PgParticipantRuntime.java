@@ -47,7 +47,7 @@ public class PgParticipantRuntime extends ParticipantRuntime {
         super(moduleName, runtimeName, bpn, properties);
         this.dbName = runtimeName.toLowerCase();
         this.registerServiceMock(IdentityService.class, new MockDapsService(bpn));
-        this.registerServiceMock(Vault.class, new InMemoryVaultOverride(mock(Monitor.class)));
+        mockVault();
 
         postgreSqlContainer = new PostgreSQLContainer<>(POSTGRES_IMAGE_NAME)
                 .withLabel("runtime", dbName)
@@ -107,6 +107,10 @@ public class PgParticipantRuntime extends ParticipantRuntime {
                 put("edc.datasource.edr.url", jdbcUrl);
                 put("edc.datasource.edr.user", USER);
                 put("edc.datasource.edr.password", PASSWORD);
+                put("edc.datasource.bpn.name", "bpn");
+                put("edc.datasource.bpn.url", jdbcUrl);
+                put("edc.datasource.bpn.user", USER);
+                put("edc.datasource.bpn.password", PASSWORD);
                 // use non-default schema name to test usage of non-default schema
                 put("org.eclipse.tractusx.edc.postgresql.migration.schema", DB_SCHEMA_NAME);
             }
@@ -119,6 +123,10 @@ public class PgParticipantRuntime extends ParticipantRuntime {
 
     public String baseJdbcUrl() {
         return format("jdbc:postgresql://%s:%s/", postgreSqlContainer.getHost(), postgreSqlContainer.getFirstMappedPort());
+    }
+
+    protected void mockVault() {
+        this.registerServiceMock(Vault.class, new InMemoryVaultOverride(mock(Monitor.class)));
     }
 
     private static class InMemoryVaultOverride extends InMemoryVault {

@@ -33,7 +33,9 @@ import org.eclipse.tractusx.edc.helpers.ContractDefinitionHelperFunctions;
 
 import java.net.URI;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static io.restassured.RestAssured.given;
@@ -41,6 +43,7 @@ import static io.restassured.http.ContentType.JSON;
 import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static org.eclipse.edc.connector.contract.spi.types.negotiation.ContractNegotiationStates.FINALIZED;
 import static org.eclipse.edc.jsonld.spi.JsonLdKeywords.ID;
 import static org.eclipse.edc.jsonld.spi.PropertyAndTypeNames.DCAT_DATASET_ATTRIBUTE;
 import static org.eclipse.tractusx.edc.helpers.AssetHelperFunctions.createDataAddressBuilder;
@@ -50,6 +53,7 @@ import static org.eclipse.tractusx.edc.helpers.CatalogHelperFunctions.getDataset
 import static org.eclipse.tractusx.edc.helpers.CatalogHelperFunctions.getDatasetFirstPolicy;
 import static org.eclipse.tractusx.edc.helpers.ContractNegotiationHelperFunctions.createNegotiationRequest;
 import static org.eclipse.tractusx.edc.helpers.EdrNegotiationHelperFunctions.createEdrNegotiationRequest;
+import static org.eclipse.tractusx.edc.helpers.PolicyHelperFunctions.TX_NAMESPACE;
 import static org.eclipse.tractusx.edc.helpers.TransferProcessHelperFunctions.createTransferRequest;
 import static org.mockito.Mockito.mock;
 
@@ -138,6 +142,20 @@ public class Participant {
                 .then()
                 .statusCode(200)
                 .contentType(JSON);
+    }
+
+    public void storeBusinessPartner(String bpn, String... groups) {
+        var body = Json.createObjectBuilder()
+                .add(ID, bpn)
+                .add(TX_NAMESPACE + "groups", Json.createArrayBuilder(Arrays.asList(groups)))
+                .build();
+        baseRequest()
+                .contentType(JSON)
+                .body(body)
+                .when()
+                .post("/business-partner-groups")
+                .then()
+                .statusCode(204);
     }
 
     public String negotiateContract(Participant other, String assetId) {
@@ -326,8 +344,49 @@ public class Participant {
         return datasetReference.get();
     }
 
+    /**
+     * Request a provider asset:
+     * - retrieves the contract definition associated with the asset,
+     * - handles the contract negotiation,
+     * - initiate the data transfer.
+     *
+     * @param provider    data provider
+     * @param assetId     asset id
+     * @param destination data destination
+     * @return transfer process id.
+     */
+    public String requestAsset(Participant provider, String assetId, JsonObject destination) {
+        var negotiationId = negotiateContract(provider, assetId);
+        var contractAgreementId = waitForAgreementId(negotiationId);
+        var transferProcessId = requestTransfer(UUID.randomUUID().toString(), contractAgreementId, assetId, provider, destination);
+        assertThat(transferProcessId).isNotNull();
+        return transferProcessId;
+    }
+
+
+    public String waitForAgreementId(String negotiationId) {
+        await().atMost(timeout).untilAsserted(() -> {
+            var state = getContractNegotiationField(negotiationId, "state");
+            assertThat(state).isEqualTo(FINALIZED.name());
+        });
+
+        return getContractAgreementId(negotiationId);
+    }
+
+
     public String pullProxyDataByAssetId(Participant provider, String assetId) {
         var body = Map.of("assetId", assetId, "endpointUrl", format("%s/aas/test", provider.gatewayEndpoint));
+        return getProxyData(body);
+    }
+
+
+    public String pullProviderDataPlaneDataByAssetId(Participant provider, String assetId) {
+        var body = Map.of("assetId", assetId);
+        return getProxyData(body);
+    }
+
+    public String pullProviderDataPlaneDataByAssetIdAndCustomProperties(Participant provider, String assetId, String path, String params) {
+        var body = Map.of("assetId", assetId, "pathSegments", path, "queryParams", params);
         return getProxyData(body);
     }
 
@@ -341,6 +400,12 @@ public class Participant {
     public String pullProxyDataByTransferProcessId(Participant provider, String transferProcessId) {
         var body = Map.of("transferProcessId", transferProcessId,
                 "endpointUrl", format("%s/aas/test", provider.gatewayEndpoint));
+        return getProxyData(body);
+
+    }
+
+    public String pullProviderDataPlaneDataByTransferProcessId(Participant provider, String transferProcessId) {
+        var body = Map.of("transferProcessId", transferProcessId);
         return getProxyData(body);
 
     }
@@ -374,6 +439,7 @@ public class Participant {
     private Response proxyRequest(Map<String, String> body) {
         return given()
                 .baseUri(proxyUrl)
+                .header("x-api-key", apiKey)
                 .contentType("application/json")
                 .body(body)
                 .post(PROXY_SUBPATH);
@@ -385,4 +451,6 @@ public class Participant {
                 .header("x-api-key", apiKey)
                 .contentType(JSON);
     }
+
+
 }

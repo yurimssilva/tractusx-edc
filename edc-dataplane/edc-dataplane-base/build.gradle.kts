@@ -29,11 +29,15 @@ dependencies {
     runtimeOnly(project(":edc-extensions:dataplane-proxy:edc-dataplane-proxy-provider-core"))
 
     runtimeOnly(libs.edc.config.filesystem)
+    runtimeOnly(libs.edc.auth.tokenbased)
     runtimeOnly(libs.edc.dpf.awss3)
+    runtimeOnly(libs.edc.dpf.azblob)
     runtimeOnly(libs.edc.dpf.oauth2)
     runtimeOnly(libs.edc.dpf.http)
 
-    runtimeOnly(libs.edc.dpf.framework)
+    runtimeOnly(libs.edc.dpf.core)
+    runtimeOnly(libs.edc.controlplane.apiclient)
+
     runtimeOnly(libs.edc.dpf.api)
     runtimeOnly(libs.edc.core.connector)
     runtimeOnly(libs.edc.boot)

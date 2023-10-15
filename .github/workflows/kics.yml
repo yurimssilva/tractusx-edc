@@ -40,7 +40,7 @@ jobs:
       security-events: write
 
     steps:
-      - uses: actions/checkout@v3.5.2
+      - uses: actions/checkout@v4
 
       - name: KICS scan
         uses: checkmarx/kics-github-action@v1.5
@@ -50,6 +50,7 @@ jobs:
           disable_secrets: true
           output_path: kicsResults/
           output_formats: "json,sarif"
+          exclude_paths: "edc-tests/miw-tests/src/test/resources/docker-environment/docker-compose.yaml"
 
       - name: Upload SARIF file for GitHub Advanced Security Dashboard
         if: always()

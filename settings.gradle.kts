@@ -32,7 +32,11 @@ include(":core:edr-core")
 include(":core:json-ld-core")
 
 
-include(":edc-extensions:business-partner-validation")
+include(":edc-extensions:bpn-validation")
+include(":edc-extensions:bpn-validation:bpn-validation-api")
+include(":edc-extensions:bpn-validation:bpn-validation-spi")
+include(":edc-extensions:bpn-validation:bpn-validation-core")
+include(":edc-extensions:bpn-validation:business-partner-store-sql")
 include(":edc-extensions:cx-oauth2")
 include(":edc-extensions:data-encryption")
 include(":edc-extensions:dataplane-selector-configuration")
@@ -50,13 +54,17 @@ include("edc-extensions:ssi:ssi-miw-credential-client")
 include("edc-extensions:ssi:jws2020-crypto-suite")
 include(":edc-extensions:ssi:ssi-identity-extractor")
 
-
+// test modules
 include(":edc-tests:e2e-tests")
 include(":edc-tests:miw-tests")
 include(":edc-tests:runtime:extensions")
 include(":edc-tests:runtime:runtime-memory")
+include(":edc-tests:runtime:dataplane-cloud")
 include(":edc-tests:runtime:runtime-memory-ssi")
 include(":edc-tests:runtime:runtime-postgresql")
+include(":edc-tests:runtime:runtime-postgresql-hashicorp")
+include(":edc-tests:edc-dataplane:edc-dataplane-proxy-e2e")
+include(":edc-tests:edc-dataplane:cloud-transfer-tests")
 
 // modules for controlplane artifacts
 include(":edc-controlplane")
@@ -65,7 +73,6 @@ include(":edc-controlplane:edc-runtime-memory")
 include(":edc-controlplane:edc-controlplane-memory-hashicorp-vault")
 include(":edc-controlplane:edc-controlplane-postgresql-azure-vault")
 include(":edc-controlplane:edc-controlplane-postgresql-hashicorp-vault")
-include(":edc-controlplane:edc-controlplane-postgresql-hashicorp-vault-legacy")
 
 // modules for dataplane artifacts
 include(":edc-dataplane")
@@ -76,7 +83,8 @@ include(":edc-extensions:dataplane-proxy:edc-dataplane-proxy-consumer-api")
 include(":edc-extensions:dataplane-proxy:edc-dataplane-proxy-provider-spi")
 include(":edc-extensions:dataplane-proxy:edc-dataplane-proxy-provider-core")
 include(":edc-extensions:dataplane-proxy:edc-dataplane-proxy-provider-api")
-include(":edc-tests:edc-dataplane-proxy-e2e")
+
+include(":samples:multi-tenancy")
 
 
 // this is needed to have access to snapshot builds of plugins
